@@ -32,19 +32,23 @@ def etl_data_cleaning(data_path, data_name):
         duplicates.to_csv(f"{data_name}_duplicates.csv", index=False)
         print(f"📝 Duplicates saved as: {data_name}_duplicates.csv")
         df = df.drop_duplicates()
-        # After Handle duplicates
-        print(f"Summary: {total_duplicates} duplicates found. {df.shape[0]} rows remain after deduplication.")
+    # After Handle duplicates
+    print(f"Summary: {total_duplicates} duplicates found. {df.shape[0]} rows remain after deduplication.")
 
 
     # Clean 'name' column: remove titles, impute missing
     if 'name' in df.columns:
         df['name'] = df['name'].str.replace(r'^(Dr|Mr|Mrs|Ms|MD|DDS|DVM)\.?\s+', '', regex=True).str.strip()
         df['name'] = df['name'].fillna("Unknown")  # New: Impute missing names
+    # After Clean 'name' column
+    print(f"Summary: Missing names imputed: {df['name'].eq('Unknown').sum()}. Titles removed from names.")
 
     # Clean 'email' column: lowercase, strip, impute missing
     if 'email' in df.columns:
         df['email'] = df['email'].str.lower().str.strip()
         df['email'] = df['email'].fillna("no_email@unknown.com")  # New: Impute missing emails
+    # After Clean 'email' column
+    print(f"Summary: Missing emails imputed: {df['email'].eq('no_email@unknown.com').sum()}. Emails standardized to lowercase.")
 
     # Convert 'birthdate' to datetime, drop invalid, add age
     if 'birthdate' in df.columns:
@@ -55,6 +59,8 @@ def etl_data_cleaning(data_path, data_name):
         df['age_flag'] = df['age'].apply(lambda x: 'Suspicious' if x < 0 or x > 100 else 'Valid')
         # New: Add birthdate string format
         df['birthdate_str'] = df['birthdate'].dt.strftime('%d-%m-%Y')
+    # After Convert 'birthdate' to datetime, drop invalid, add age
+    print(f"Summary: Invalid birthdates dropped: {df['birthdate'].isna().sum()}. Suspicious ages flagged: {df['age_flag'].eq('Suspicious').sum()}. Birthdate string format added.")
 
     # Clean and validate 'signup_date', add days since signup
     if 'signup_date' in df.columns:
