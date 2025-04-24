@@ -78,6 +78,8 @@ def etl_data_cleaning(data_path, data_name):
     if 'purchase_amount' in df.columns:
         df['purchase_amount'] = pd.to_numeric(df['purchase_amount'], errors='coerce')
         df['purchase_amount'] = df['purchase_amount'].fillna(df['purchase_amount'].mean())  # New: Use mean
+    # After Clean 'purchase_amount'
+    print(f"Summary: Non-numeric purchase_amount values converted to NaN: {df['purchase_amount'].isna().sum()}. Missing values filled with mean: {df['purchase_amount'].isna().sum()}.")
 
     # Normalize 'category', drop missing
     if 'category' in df.columns:
@@ -94,17 +96,23 @@ def etl_data_cleaning(data_path, data_name):
             'beauty': 'Beauty'
         }
         df['category'] = df['category'].map(category_map).fillna(df['category'])
+    # After Normalize 'category'
+    print(f"Summary: Missing categories dropped: {df['category'].isna().sum()}. Categories standardized: {df['category'].value_counts().to_dict()}.")
 
     # Trim whitespace from all string columns
     for col in df.select_dtypes(include='object').columns:
         df[col] = df[col].str.strip()
+    # After Trim whitespace from all string columns
+    print(f"Summary: Whitespace trimmed from string columns: {list(df.select_dtypes(include='object').columns)}.")
+
 
     # Checking data consistency: flagging rows where signup_date is before birthdate
     if 'birthdate' in df.columns and 'signup_date' in df.columns:
         df['date_consistency'] = df.apply(
             lambda x: 'Invalid' if pd.notna(x['birthdate']) and pd.notna(x['signup_date']) 
             and x['signup_date'] < x['birthdate'] else 'Valid', axis=1)
-
+    # After Checking data consistency
+    print(f"Summary: Inconsistent dates flagged: {df['date_consistency'].eq('Invalid').sum()} invalid signup_date vs. birthdate cases.")
     # Save cleaned data
     clean_file = f"{data_name}_cleaned.csv"
     df.to_csv(clean_file, index=False)
