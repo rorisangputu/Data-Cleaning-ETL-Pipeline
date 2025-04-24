@@ -71,6 +71,8 @@ def etl_data_cleaning(data_path, data_name):
         df['days_since_signup'] = (today - df['signup_date']).dt.days  # New: Days since signup
         # New: Add signup_date string format
         df['signup_date_str'] = df['signup_date'].dt.strftime('%d-%m-%Y')
+    # After Clean and validate 'signup_date'
+    print(f"Summary: Invalid signup dates dropped: {df['signup_date'].isna().sum()}. Future signup dates removed: {df['signup_date'].gt(today).sum()}. Days since signup and string format added.")
 
     # Clean 'purchase_amount': convert to numeric, fill NAs with mean (instead of 0)
     if 'purchase_amount' in df.columns:
