@@ -32,6 +32,9 @@ def etl_data_cleaning(data_path, data_name):
         duplicates.to_csv(f"{data_name}_duplicates.csv", index=False)
         print(f"📝 Duplicates saved as: {data_name}_duplicates.csv")
         df = df.drop_duplicates()
+        # After Handle duplicates
+        print(f"Summary: {total_duplicates} duplicates found. {df.shape[0]} rows remain after deduplication.")
+
 
     # Clean 'name' column: remove titles, impute missing
     if 'name' in df.columns:
